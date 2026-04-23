@@ -11,7 +11,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, business } = body
+    const { name, email, business, phone = '' } = body
 
     if (!name || !email || !business) {
       return new Response(
@@ -20,7 +20,14 @@ export async function POST(request: Request) {
       )
     }
 
-    const GC_API_KEY = 'a5934d6c63f5d021e4d85164945d144fbefeaf6298938c02ba2655acb093379c'
+    const GC_API_KEY = process.env.GLOBALCONTROL_API_KEY || ''
+    if (!GC_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const firstName = name.split(' ')[0] || ''
     const lastName = name.split(' ').slice(1).join(' ') || ''
     
@@ -35,14 +42,15 @@ export async function POST(request: Request) {
         email: email,
         firstName: firstName,
         lastName: lastName,
-        name: name
+        name: name,
+        phone: phone
       })
     })
 
     if (!createRes.ok) {
       const errorText = await createRes.text()
       return new Response(
-        JSON.stringify({ error: `Global Control error: ${createRes.status} - ${errorText}` }),
+        JSON.stringify({ error: `Global Control error: ${createRes.status}` }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Update contact with tags
+    // Step 2: Update contact with tags and custom fields
     const updateRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
@@ -74,14 +82,11 @@ export async function POST(request: Request) {
       })
     })
 
-    const updateData = await updateRes.json()
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId,
-        tagsApplied: updateRes.ok
+        contactId: contactId
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
@@ -89,7 +94,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('API error:', error)
     return new Response(
-      JSON.stringify({ error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown'}` }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
