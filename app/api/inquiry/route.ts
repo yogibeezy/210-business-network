@@ -67,8 +67,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Wait for GC to process the contact
-    await delay(1000)
+    // Step 2: Wait for GC to process the contact (increased delay)
+    await delay(3000)
 
     // Step 3: Update contact with tags
     await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
