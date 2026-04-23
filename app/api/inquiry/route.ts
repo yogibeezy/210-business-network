@@ -64,8 +64,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Update contact with tags (THIS WORKS - proven above)
-    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+    // Step 2: Update contact with tags
+    const tagRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +76,11 @@ export async function POST(request: Request) {
       })
     })
 
-    // Step 3: Update custom fields separately
+    const tagData = await tagRes.json()
+    const tagStatus = tagRes.status
+    const tagCount = tagData.data?.tags?.length || 0
+
+    // Step 3: Update custom fields
     await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
@@ -96,7 +100,9 @@ export async function POST(request: Request) {
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId
+        contactId: contactId,
+        tagStatus: tagStatus,
+        tagCount: tagCount
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
