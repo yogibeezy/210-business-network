@@ -8,6 +8,9 @@ export async function GET() {
   )
 }
 
+// Small delay to let GC process the contact
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -64,8 +67,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Update contact with tags
-    const tagRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+    // Step 2: Wait for GC to process the contact
+    await delay(1000)
+
+    // Step 3: Update contact with tags
+    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -76,11 +82,7 @@ export async function POST(request: Request) {
       })
     })
 
-    const tagData = await tagRes.json()
-    const tagStatus = tagRes.status
-    const tagCount = tagData.data?.tags?.length || 0
-
-    // Step 3: Update custom fields
+    // Step 4: Update custom fields
     await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
@@ -100,9 +102,7 @@ export async function POST(request: Request) {
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId,
-        tagStatus: tagStatus,
-        tagCount: tagCount
+        contactId: contactId
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
