@@ -64,47 +64,34 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Fire tags using the tag endpoint
-    const tagIds = ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071']
-    
-    for (const tagId of tagIds) {
-      try {
-        await fetch(`https://api.globalcontrol.io/api/ai/tags/${tagId}/contacts`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-API-KEY': GC_API_KEY
-          },
-          body: JSON.stringify({
-            contactId: contactId
-          })
-        })
-      } catch {
-        // Ignore individual tag errors
-      }
+    // Step 2: Update with tags and custom fields
+    const updateBody = {
+      tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
+      customFields: [
+        { key: 'businessName', value: business },
+        { key: 'source', value: '210 Business Network Website' },
+        { key: 'inquiryDate', value: new Date().toISOString() }
+      ]
     }
 
-    // Step 3: Update custom fields
-    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+    const updateRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-API-KEY': GC_API_KEY
       },
-      body: JSON.stringify({
-        customFields: [
-          { key: 'businessName', value: business },
-          { key: 'source', value: '210 Business Network Website' },
-          { key: 'inquiryDate', value: new Date().toISOString() }
-        ]
-      })
+      body: JSON.stringify(updateBody)
     })
+
+    const updateData = await updateRes.json()
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId
+        contactId: contactId,
+        updateOk: updateRes.ok,
+        hasTags: updateData.data?.tags?.length > 0
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
