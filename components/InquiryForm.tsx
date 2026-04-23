@@ -18,10 +18,9 @@ export default function InquiryForm() {
     const data = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
       business: formData.get('business') as string,
     }
-
-    console.log('Submitting form data:', data)
 
     try {
       const res = await fetch('/api/inquiry', {
@@ -30,32 +29,18 @@ export default function InquiryForm() {
         body: JSON.stringify(data),
       })
 
-      console.log('Response status:', res.status)
-      
-      let result
-      try {
-        result = await res.json()
-      } catch (parseError) {
-        console.error('Failed to parse response:', parseError)
-        setMessage('Server error. Please try again.')
-        setError(true)
-        setSubmitting(false)
-        return
-      }
-
-      console.log('Response data:', result)
+      const result = await res.json()
 
       if (res.ok) {
         setMessage('Thank you. We will be in touch.')
         setError(false)
         form.reset()
       } else {
-        setMessage(result.error || `Error: ${res.status}. Please try again.`)
+        setMessage(result.error || 'Error submitting. Please try again.')
         setError(true)
       }
     } catch (err) {
-      console.error('Fetch error:', err)
-      setMessage(`Network error: ${err instanceof Error ? err.message : 'Unknown error'}. Please try again.`)
+      setMessage('Network error. Please try again.')
       setError(true)
     }
 
@@ -80,6 +65,12 @@ export default function InquiryForm() {
           className="w-full px-6 py-4 bg-black border border-amber-500/30 text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-500 transition-colors font-light"
         />
       </div>
+      <input 
+        type="tel" 
+        name="phone"
+        placeholder="Phone (optional)"
+        className="w-full px-6 py-4 bg-black border border-amber-500/30 text-white placeholder:text-neutral-500 focus:outline-none focus:border-amber-500 transition-colors font-light"
+      />
       <input 
         type="text" 
         name="business"

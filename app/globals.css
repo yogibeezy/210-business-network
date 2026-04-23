@@ -2,9 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  color: white;
-  background: black;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-neutral-950 text-white;
+  }
 }
 
 @layer utilities {

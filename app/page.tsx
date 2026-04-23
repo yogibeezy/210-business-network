@@ -1,163 +1,115 @@
-'use client'
-
-import { useState } from 'react'
+import InquiryForm from '@/components/InquiryForm'
 
 export default function Home() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    business: ''
-  })
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
-  const [message, setMessage] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setStatus('submitting')
-
-    try {
-      const res = await fetch('/api/inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      const data = await res.json()
-
-      if (res.ok) {
-        setStatus('success')
-        setMessage(data.message || 'Thank you. We will be in touch.')
-        setFormData({ name: '', email: '', phone: '', business: '' })
-      } else {
-        setStatus('error')
-        setMessage(data.error || 'Something went wrong. Please try again.')
-      }
-    } catch {
-      setStatus('error')
-      setMessage('Network error. Please try again.')
-    }
-  }
-
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* Hero Section */}
-      <section className="relative px-6 py-24 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
-            210 Business Network
+    <main className="min-h-screen bg-neutral-950 text-white selection:bg-amber-500/30">
+      
+      {/* HERO */}
+      <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-transparent to-neutral-950/80" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full py-20">
+          <p className="text-sm md:text-base tracking-[0.3em] uppercase text-neutral-500 mb-6 md:mb-8">
+            San Antonio & South Texas
+          </p>
+
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold leading-[0.9] tracking-tight mb-8">
+            <span className="block">210</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
+              Business
+            </span>
+            <span className="block">Network</span>
           </h1>
-          <p className="text-lg leading-8 text-gray-300 mb-4">
-            Where South Texas Business Happens
+
+          <p className="text-xl md:text-3xl lg:text-4xl text-neutral-300 font-light max-w-3xl leading-relaxed mb-12">
+            Where South Texas business happens.
           </p>
-          <p className="text-base text-gray-400 max-w-2xl mx-auto">
-            The network for San Antonio and South Texas business owners, operators, and builders. 
-            Connect with the people who make things happen.
-          </p>
+
+          <div className="w-24 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
         </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-neutral-950 to-transparent z-10" />
       </section>
 
-      {/* Inquiry Form Section */}
-      <section className="px-6 py-16 lg:px-8 border-t border-gray-800">
-        <div className="mx-auto max-w-xl">
-          <h2 className="text-2xl font-semibold text-center mb-2">Join the Network</h2>
-          <p className="text-gray-400 text-center mb-8">
-            Get connected with South Texas business leaders
-          </p>
-
-          {status === 'success' ? (
-            <div className="bg-green-900/20 border border-green-800 rounded-lg p-6 text-center">
-              <p className="text-green-400 font-medium">{message}</p>
-              <button
-                onClick={() => setStatus('idle')}
-                className="mt-4 text-sm text-gray-400 hover:text-white underline"
-              >
-                Submit another inquiry
-              </button>
+      {/* THE NETWORK */}
+      <section className="px-8 md:px-16 lg:px-24 py-32 md:py-40 border-t border-neutral-900">
+        <div className="max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-16 md:gap-24">
+            <div>
+              <p className="text-xs tracking-[0.4em] uppercase text-amber-500 mb-6">Membership</p>
+              <h2 className="text-3xl md:text-4xl font-light leading-tight">
+                A private network for business owners who build things.
+              </h2>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-gray-500"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-gray-500"
-                  placeholder="john@company.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-gray-500"
-                  placeholder="(210) 555-1234"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="business" className="block text-sm font-medium text-gray-300 mb-1">
-                  Business Name *
-                </label>
-                <input
-                  type="text"
-                  id="business"
-                  required
-                  value={formData.business}
-                  onChange={(e) => setFormData({ ...formData, business: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder-gray-500"
-                  placeholder="Your Company LLC"
-                />
-              </div>
-
-              {status === 'error' && (
-                <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
-                  <p className="text-red-400 text-sm">{message}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={status === 'submitting'}
-                className="w-full py-3 px-4 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {status === 'submitting' ? 'Submitting...' : 'Join the Network'}
-              </button>
-            </form>
-          )}
+            <div className="space-y-6 text-neutral-400 font-light leading-relaxed">
+              <p>
+                HVAC. Plumbing. Automotive. Roofing. Electrical. Landscaping. 
+                Concrete. Painting. Pools. Restaurants. Retail. Professional services. 
+                If you operate a business in South Texas, you belong here.
+              </p>
+              <p className="text-neutral-300">
+                This is not a directory. This is a network of operators who 
+                understand what it takes to build something real.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-gray-800">
-        <div className="mx-auto max-w-7xl text-center text-sm text-gray-500">
-          © 2026 210 Business Network. All rights reserved.
+      {/* THE TERRITORY */}
+      <section className="px-8 md:px-16 lg:px-24 py-32 md:py-40 bg-neutral-900/30">
+        <div className="max-w-6xl">
+          <p className="text-xs tracking-[0.4em] uppercase text-amber-500 mb-6">Territory</p>
+          <h2 className="text-3xl md:text-5xl font-light mb-8">Border to coast.</h2>
+          <p className="text-neutral-400 font-light text-lg max-w-2xl mb-16">
+            Eagle Pass to Corpus Christi. Laredo to Lockhart. 
+            The full sweep of South Texas.
+          </p>
+
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-px bg-neutral-800">
+            {[
+              'San Antonio', 'Eagle Pass', 'Corpus Christi', 'Laredo',
+              'New Braunfels', 'Schertz', 'Seguin', 'Cibolo',
+              'Universal City', 'Converse', 'Helotes', 'Boerne',
+              'Kyle', 'San Marcos', 'Lockhart', 'Pleasanton',
+              'Jourdanton', 'Devine', 'Hondo', 'Bandera',
+              'Kerrville', 'Uvalde', 'Carrizo Springs', 'Crystal City'
+            ].map((city) => (
+              <div key={city} className="bg-neutral-950 py-4 px-2 text-center">
+                <p className="text-neutral-500 text-sm font-light">{city}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INQUIRY */}
+      <section className="px-8 md:px-16 lg:px-24 py-32 md:py-40 border-t border-neutral-900">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="text-xs tracking-[0.4em] uppercase text-amber-500 mb-6">Inquiry</p>
+          <h2 className="text-3xl md:text-4xl font-light mb-6">Request an introduction.</h2>
+          <p className="text-neutral-400 font-light mb-12">
+            Membership is curated. Tell us about your business and we&apos;ll be in touch.
+          </p>
+
+          <InquiryForm />
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="px-8 md:px-16 lg:px-24 py-12 border-t border-neutral-900">
+        <div className="max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-neutral-600 text-sm font-light">
+            210 Business Network
+          </p>
+          <p className="text-neutral-700 text-sm font-light">
+            South Texas
+          </p>
         </div>
       </footer>
     </main>
