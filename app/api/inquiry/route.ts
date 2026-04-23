@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const firstName = name.split(' ')[0] || ''
     const lastName = name.split(' ').slice(1).join(' ') || ''
     
-    // Create contact with tags and custom fields in one call
+    // Step 1: Create contact
     const createRes = await fetch('https://api.globalcontrol.io/api/ai/contacts', {
       method: 'POST',
       headers: {
@@ -43,8 +43,55 @@ export async function POST(request: Request) {
         firstName: firstName,
         lastName: lastName,
         name: name,
-        phone: phone,
-        tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
+        phone: phone
+      })
+    })
+
+    if (!createRes.ok) {
+      return new Response(
+        JSON.stringify({ error: `Global Control error: ${createRes.status}` }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const createData = await createRes.json()
+    const contactId = createData.data?._id || createData.data?.id
+
+    if (!contactId) {
+      return new Response(
+        JSON.stringify({ success: true, message: 'Thank you. We will be in touch.' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Step 2: Fire tags using the tag endpoint
+    const tagIds = ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071']
+    
+    for (const tagId of tagIds) {
+      try {
+        await fetch(`https://api.globalcontrol.io/api/ai/tags/${tagId}/contacts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-KEY': GC_API_KEY
+          },
+          body: JSON.stringify({
+            contactId: contactId
+          })
+        })
+      } catch {
+        // Ignore individual tag errors
+      }
+    }
+
+    // Step 3: Update custom fields
+    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': GC_API_KEY
+      },
+      body: JSON.stringify({
         customFields: [
           { key: 'businessName', value: business },
           { key: 'source', value: '210 Business Network Website' },
@@ -53,24 +100,11 @@ export async function POST(request: Request) {
       })
     })
 
-    if (!createRes.ok) {
-      const errorText = await createRes.text()
-      return new Response(
-        JSON.stringify({ error: `Global Control error: ${createRes.status} - ${errorText}` }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const createData = await createRes.json()
-    const contactId = createData.data?._id || createData.data?.id
-    const tagsApplied = createData.data?.tags || []
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId,
-        tagsCount: tagsApplied.length
+        contactId: contactId
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
