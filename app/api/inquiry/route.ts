@@ -65,31 +65,33 @@ export async function POST(request: Request) {
     }
 
     // Step 2: Update contact with tags and custom fields
+    const updatePayload = {
+      tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
+      customFields: [
+        { key: 'businessName', value: business },
+        { key: 'source', value: '210 Business Network Website' },
+        { key: 'inquiryDate', value: new Date().toISOString() }
+      ]
+    }
+
     const updateRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-API-KEY': GC_API_KEY
       },
-      body: JSON.stringify({
-        tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
-        customFields: [
-          { key: 'businessName', value: business },
-          { key: 'source', value: '210 Business Network Website' },
-          { key: 'inquiryDate', value: new Date().toISOString() }
-        ]
-      })
+      body: JSON.stringify(updatePayload)
     })
 
     const updateData = await updateRes.json()
-    const tagsApplied = updateData.data?.tags?.length > 0
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
         contactId: contactId,
-        tagsApplied: tagsApplied
+        updateStatus: updateRes.status,
+        updateResponse: updateData
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
