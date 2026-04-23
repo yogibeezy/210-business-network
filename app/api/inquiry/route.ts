@@ -48,7 +48,6 @@ export async function POST(request: Request) {
     })
 
     if (!createRes.ok) {
-      const errorText = await createRes.text()
       return new Response(
         JSON.stringify({ error: `Global Control error: ${createRes.status}` }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -66,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Step 2: Update contact with tags and custom fields
-    const updateRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
