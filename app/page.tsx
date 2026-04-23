@@ -8,6 +8,11 @@ export default function Home() {
       <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
+          <img 
+            src="/sa-skyline-night.jpg" 
+            alt="San Antonio skyline"
+            className="w-full h-full object-cover opacity-40"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-transparent to-neutral-950/80" />
         </div>
@@ -71,17 +76,19 @@ export default function Home() {
             The full sweep of South Texas.
           </p>
 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-px bg-neutral-800">
-            {[
-              'San Antonio', 'New Braunfels', 'Schertz', 'Seguin', 'Cibolo', 'Converse',
-              'Universal City', 'Helotes', 'Boerne', 'Kyle', 'San Marcos', 'Lockhart',
-              'Pleasanton', 'Jourdanton', 'Devine', 'Hondo', 'Bandera', 'Kerrville',
-              'Uvalde', 'Carrizo Springs', 'Crystal City', 'Eagle Pass', 'Corpus Christi', 'Laredo'
-            ].map((city) => (
-              <div key={city} className="bg-neutral-950 py-4 px-2 text-center">
-                <p className="text-neutral-500 text-sm font-light">{city}</p>
-              </div>
-            ))}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-px bg-neutral-800 max-w-4xl">
+              {[
+                'San Antonio', 'New Braunfels', 'Schertz', 'Seguin', 'Cibolo', 'Converse',
+                'Universal City', 'Helotes', 'Boerne', 'Kyle', 'San Marcos', 'Lockhart',
+                'Pleasanton', 'Jourdanton', 'Devine', 'Hondo', 'Bandera', 'Kerrville',
+                'Uvalde', 'Carrizo Springs', 'Crystal City', 'Eagle Pass', 'Corpus Christi', 'Laredo'
+              ].map((city) => (
+                <div key={city} className="bg-neutral-950 py-4 px-2 text-center">
+                  <p className="text-neutral-500 text-sm font-light">{city}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
