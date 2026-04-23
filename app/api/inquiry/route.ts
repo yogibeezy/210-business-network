@@ -43,12 +43,7 @@ export async function POST(request: Request) {
         firstName: firstName,
         lastName: lastName,
         name: name,
-        phone: phone,
-        customFields: [
-          { key: 'businessName', value: business },
-          { key: 'source', value: '210 Business Network Website' },
-          { key: 'inquiryDate', value: new Date().toISOString() }
-        ]
+        phone: phone
       })
     })
 
@@ -69,22 +64,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Fire tags on contact (fire both tags in parallel)
-    const tagIds = ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071']
-    
-    await Promise.all(tagIds.map(tagId => 
-      fetch('https://api.globalcontrol.io/api/ai/tags/fire', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-KEY': GC_API_KEY
-        },
-        body: JSON.stringify({
-          tagId: tagId,
-          contactId: contactId
-        })
+    // Step 2: Update contact with tags and custom fields
+    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': GC_API_KEY
+      },
+      body: JSON.stringify({
+        tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
+        customFields: [
+          { key: 'businessName', value: business },
+          { key: 'source', value: '210 Business Network Website' },
+          { key: 'inquiryDate', value: new Date().toISOString() }
+        ]
       })
-    ))
+    })
 
     return new Response(
       JSON.stringify({ 
