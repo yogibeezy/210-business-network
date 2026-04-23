@@ -39,7 +39,7 @@ export default function InquiryForm() {
         setMessage(result.error || 'Error submitting. Please try again.')
         setError(true)
       }
-    } catch (err) {
+    } catch {
       setMessage('Network error. Please try again.')
       setError(true)
     }
