@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const firstName = name.split(' ')[0] || ''
     const lastName = name.split(' ').slice(1).join(' ') || ''
     
-    // Step 1: Create contact
+    // Create contact with tags and custom fields in one call
     const createRes = await fetch('https://api.globalcontrol.io/api/ai/contacts', {
       method: 'POST',
       headers: {
@@ -43,35 +43,7 @@ export async function POST(request: Request) {
         firstName: firstName,
         lastName: lastName,
         name: name,
-        phone: phone
-      })
-    })
-
-    if (!createRes.ok) {
-      return new Response(
-        JSON.stringify({ error: `Global Control error: ${createRes.status}` }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const createData = await createRes.json()
-    const contactId = createData.data?._id || createData.data?.id
-
-    if (!contactId) {
-      return new Response(
-        JSON.stringify({ success: true, message: 'Thank you. We will be in touch.' }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Step 2: Update contact with tags and custom fields
-    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': GC_API_KEY
-      },
-      body: JSON.stringify({
+        phone: phone,
         tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'],
         customFields: [
           { key: 'businessName', value: business },
@@ -81,11 +53,24 @@ export async function POST(request: Request) {
       })
     })
 
+    if (!createRes.ok) {
+      const errorText = await createRes.text()
+      return new Response(
+        JSON.stringify({ error: `Global Control error: ${createRes.status} - ${errorText}` }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const createData = await createRes.json()
+    const contactId = createData.data?._id || createData.data?.id
+    const tagsApplied = createData.data?.tags || []
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
-        contactId: contactId
+        contactId: contactId,
+        tagsCount: tagsApplied.length
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
