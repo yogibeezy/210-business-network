@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Step 2: Update contact with tags (THIS WORKS - proven above)
-    const updateRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
