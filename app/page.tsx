@@ -73,12 +73,10 @@ export default function Home() {
 
           <div className="grid grid-cols-3 md:grid-cols-6 gap-px bg-neutral-800">
             {[
-              'San Antonio', 'Eagle Pass', 'Corpus Christi', 'Laredo',
-              'New Braunfels', 'Schertz', 'Seguin', 'Cibolo',
-              'Universal City', 'Converse', 'Helotes', 'Boerne',
-              'Kyle', 'San Marcos', 'Lockhart', 'Pleasanton',
-              'Jourdanton', 'Devine', 'Hondo', 'Bandera',
-              'Kerrville', 'Uvalde', 'Carrizo Springs', 'Crystal City'
+              'San Antonio', 'New Braunfels', 'Schertz', 'Seguin', 'Cibolo', 'Converse',
+              'Universal City', 'Helotes', 'Boerne', 'Kyle', 'San Marcos', 'Lockhart',
+              'Pleasanton', 'Jourdanton', 'Devine', 'Hondo', 'Bandera', 'Kerrville',
+              'Uvalde', 'Carrizo Springs', 'Crystal City', 'Eagle Pass', 'Corpus Christi', 'Laredo'
             ].map((city) => (
               <div key={city} className="bg-neutral-950 py-4 px-2 text-center">
                 <p className="text-neutral-500 text-sm font-light">{city}</p>
