@@ -1,6 +1,8 @@
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
+import axios from 'axios'
+
 export async function GET() {
   return new Response(
     JSON.stringify({ status: 'API is working' }),
@@ -34,32 +36,26 @@ export async function POST(request: Request) {
     const firstName = name.split(' ')[0] || ''
     const lastName = name.split(' ').slice(1).join(' ') || ''
     
-    // Step 1: Create contact
-    const createRes = await fetch('https://api.globalcontrol.io/api/ai/contacts', {
-      method: 'POST',
+    // Create axios instance with default headers
+    const gcApi = axios.create({
+      baseURL: 'https://api.globalcontrol.io/api/ai',
       headers: {
-        'Content-Type': 'application/json',
         'X-API-KEY': GC_API_KEY,
+        'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        name: name,
-        phone: phone
-      })
+      }
+    })
+    
+    // Step 1: Create contact
+    const createRes = await gcApi.post('/contacts', {
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      name: name,
+      phone: phone
     })
 
-    if (!createRes.ok) {
-      return new Response(
-        JSON.stringify({ error: `Global Control error: ${createRes.status}` }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const createData = await createRes.json()
-    const contactId = createData.data?._id || createData.data?.id
+    const contactId = createRes.data.data?._id || createRes.data.data?.id
 
     if (!contactId) {
       return new Response(
@@ -71,25 +67,15 @@ export async function POST(request: Request) {
     // Step 2: Wait for GC to process
     await delay(2000)
 
-    // Step 3: Update contact with tags using explicit headers like curl
-    const tagBody = JSON.stringify({ tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'] })
-    
-    const tagRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': GC_API_KEY,
-        'Accept': 'application/json',
-        'Content-Length': String(tagBody.length)
-      },
-      body: tagBody
+    // Step 3: Update contact with tags using axios
+    const tagRes = await gcApi.put(`/contacts/${contactId}`, {
+      tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071']
     })
 
-    const tagData = await tagRes.json()
-    const hasTags = tagData.data?.tags?.length === 2
+    const hasTags = tagRes.data.data?.tags?.length === 2
 
     // Step 4: Update custom fields
-    const customBody = JSON.stringify({
+    await gcApi.put(`/contacts/${contactId}`, {
       customFields: [
         { key: 'businessName', value: business },
         { key: 'source', value: '210 Business Network Website' },
@@ -97,25 +83,12 @@ export async function POST(request: Request) {
       ]
     })
 
-    await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': GC_API_KEY,
-        'Accept': 'application/json',
-        'Content-Length': String(customBody.length)
-      },
-      body: customBody
-    })
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Thank you. We will be in touch.',
         contactId: contactId,
-        tagStatus: tagRes.status,
-        hasTags: hasTags,
-        tagResponse: tagData.data?.tags
+        hasTags: hasTags
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
