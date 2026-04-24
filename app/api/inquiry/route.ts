@@ -39,7 +39,8 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-KEY': GC_API_KEY
+        'X-API-KEY': GC_API_KEY,
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         email: email,
@@ -67,47 +68,44 @@ export async function POST(request: Request) {
       )
     }
 
-    // Step 2: Retry tag update up to 3 times
-    const tagIds = ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071']
-    let tagSuccess = false
-    let retries = 0
-    
-    while (!tagSuccess && retries < 3) {
-      await delay(1000 * (retries + 1)) // 1s, 2s, 3s
-      
-      const tagRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-KEY': GC_API_KEY
-        },
-        body: JSON.stringify({ tags: tagIds })
-      })
-      
-      if (tagRes.ok) {
-        const tagData = await tagRes.json()
-        if (tagData.data?.tags?.length === 2) {
-          tagSuccess = true
-        }
-      }
-      
-      retries++
-    }
+    // Step 2: Wait for GC to process
+    await delay(2000)
 
-    // Step 3: Update custom fields
+    // Step 3: Update contact with tags using explicit headers like curl
+    const tagBody = JSON.stringify({ tags: ['69e8b46f80a5749c2a3f6f0a', '69e8b47580a5749c2a3f7071'] })
+    
+    const tagRes = await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': GC_API_KEY,
+        'Accept': 'application/json',
+        'Content-Length': String(tagBody.length)
+      },
+      body: tagBody
+    })
+
+    const tagData = await tagRes.json()
+    const hasTags = tagData.data?.tags?.length === 2
+
+    // Step 4: Update custom fields
+    const customBody = JSON.stringify({
+      customFields: [
+        { key: 'businessName', value: business },
+        { key: 'source', value: '210 Business Network Website' },
+        { key: 'inquiryDate', value: new Date().toISOString() }
+      ]
+    })
+
     await fetch(`https://api.globalcontrol.io/api/ai/contacts/${contactId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-KEY': GC_API_KEY
+        'X-API-KEY': GC_API_KEY,
+        'Accept': 'application/json',
+        'Content-Length': String(customBody.length)
       },
-      body: JSON.stringify({
-        customFields: [
-          { key: 'businessName', value: business },
-          { key: 'source', value: '210 Business Network Website' },
-          { key: 'inquiryDate', value: new Date().toISOString() }
-        ]
-      })
+      body: customBody
     })
 
     return new Response(
@@ -115,8 +113,9 @@ export async function POST(request: Request) {
         success: true, 
         message: 'Thank you. We will be in touch.',
         contactId: contactId,
-        tagsApplied: tagSuccess,
-        retries: retries
+        tagStatus: tagRes.status,
+        hasTags: hasTags,
+        tagResponse: tagData.data?.tags
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
